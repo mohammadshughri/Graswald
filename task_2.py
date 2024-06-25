@@ -2,23 +2,27 @@ import requests
 import re
 from collections import Counter
 from wordcloud import WordCloud
-import matplotlib.pyplot as plt
 import base64
 from io import BytesIO
+
+import matplotlib.pyplot as plt
 import concurrent.futures
 
 
 def get_posts(n):
+    # Function to get n number of posts from the API
     url = "https://jsonplaceholder.typicode.com/posts/"
     response = requests.get(url)
     return response.json()[:n]
 
 
 def process_text(text):
+    # Function to process the text and count the occurrences of each word
     return Counter(re.findall(r"\w+", text.lower()))
 
 
 def analyze_post(post):
+    # Function to analyze a single post
     title_words = process_text(post["title"])
     body_words = process_text(post["body"])
     unique_title = set(title_words.keys()) - set(body_words.keys())
@@ -35,6 +39,7 @@ def analyze_post(post):
 
 
 def generate_wordcloud(words):
+    # Function to generate a word cloud image from the given words
     wordcloud = WordCloud(
         width=800, height=400, background_color="white"
     ).generate_from_frequencies(words)
@@ -48,6 +53,7 @@ def generate_wordcloud(words):
 
 
 def generate_bar_chart(words):
+    # Function to generate a bar chart from the given words
     top_words = dict(sorted(words.items(), key=lambda x: x[1], reverse=True)[:10])
     plt.figure(figsize=(10, 5))
     plt.bar(top_words.keys(), top_words.values())
@@ -62,6 +68,7 @@ def generate_bar_chart(words):
 
 
 def generate_html_report(results):
+    # Function to generate an HTML report from the analysis results
     html = """
     <!DOCTYPE html>
     <html lang="en">
@@ -117,6 +124,7 @@ def generate_html_report(results):
 
 
 def main(n):
+    # Main function to analyze the posts and generate the HTML report
     posts = get_posts(n)
     with concurrent.futures.ThreadPoolExecutor() as executor:
         results = list(executor.map(analyze_post, posts))
